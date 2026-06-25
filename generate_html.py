@@ -1,8 +1,23 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""将森波拉行程规划 Markdown 转为主题化 HTML"""
+
+import re
+from pathlib import Path
+
+import markdown
+from markdown.extensions.tables import TableExtension
+from markdown.extensions.fenced_code import FencedCodeExtension
+
+BASE = Path(__file__).parent
+MD_FILE = BASE / "森波拉行程规划.md"
+HTML_FILE = BASE / "森波拉行程规划.html"
+
+HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>森波拉松鼠酒店 · 13人大家庭作战手册</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,48 +157,7 @@
     }
 
     @media (max-width: 1080px) {
-      /* 平板/手机：固定贴边，从屏幕两侧探出 */
-      .animal-lane {
-        position: fixed;
-        top: 0;
-        width: 54px;
-        height: 100vh;
-        height: 100dvh;
-        z-index: 5;
-        pointer-events: none;
-      }
-
-      .animal-lane-left { left: 0; }
-      .animal-lane-right { right: 0; }
-
-      .peek-animal {
-        width: 50px;
-      }
-
-      .peek-animal--wide { width: 56px; }
-      .peek-animal--tall { width: 46px; }
-
-      .peek-animal-left .peek-animal-body { margin-left: -14px; }
-      .peek-animal-right .peek-animal-body { margin-right: -14px; }
-    }
-
-    @media (max-width: 600px) {
-      /* 小屏只保留 4 只，避免过于拥挤 */
-      .animal-lane .peek-animal:nth-child(2),
-      .animal-lane .peek-animal:nth-child(5),
-      .animal-lane .peek-animal:nth-child(6) {
-        display: none;
-      }
-
-      .animal-lane .peek-animal:nth-child(1) { top: 8% !important; }
-      .animal-lane .peek-animal:nth-child(3) { top: 38% !important; }
-      .animal-lane .peek-animal:nth-child(4) { top: 72% !important; }
-    }
-
-    @media (max-width: 1080px) and (prefers-reduced-motion: no-preference) {
-      .peek-animal-inner {
-        animation-duration: 3.2s;
-      }
+      .animal-lane { display: none; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -439,21 +413,6 @@
       background: rgba(168, 230, 255, 0.25);
     }
 
-    /* 表格横向滚动容器（移动端友好） */
-    .table-scroll {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin: 16px 0 20px;
-      border-radius: var(--radius-sm);
-      box-shadow: 0 4px 16px var(--shadow);
-    }
-
-    .table-scroll > table {
-      margin: 0;
-      box-shadow: none;
-      min-width: 100%;
-    }
-
   /* 时间线代码块 */
     pre {
       margin: 16px 0;
@@ -493,155 +452,6 @@
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(254, 250, 224, 0.95));
       border-radius: var(--radius);
       border: 2px dashed var(--leaf);
-    }
-
-  /* 移动端适配 */
-    @media (max-width: 768px) {
-      body {
-        font-size: 14px;
-        line-height: 1.7;
-      }
-
-      .page-wrap {
-        padding: 16px 16px 36px;
-        padding-left: max(16px, env(safe-area-inset-left));
-        padding-right: max(16px, env(safe-area-inset-right));
-        padding-bottom: max(36px, env(safe-area-inset-bottom));
-      }
-
-      .hero {
-        padding: 22px 16px 20px;
-        margin-bottom: 18px;
-        border-radius: 20px;
-      }
-
-      .hero-deco {
-        font-size: 18px;
-        letter-spacing: 4px;
-        margin-bottom: 6px;
-      }
-
-      .hero h1 {
-        font-size: 1.35rem;
-        line-height: 1.4;
-        margin-bottom: 10px;
-      }
-
-      .hero-meta {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-        margin-top: 12px;
-      }
-
-      .hero-badge {
-        justify-content: center;
-        font-size: 0.84rem;
-        padding: 7px 12px;
-      }
-
-      .content-card {
-        padding: 18px 14px;
-        border-radius: 14px;
-        border-width: 2px;
-      }
-
-      h2 {
-        font-size: 1.12rem;
-        margin: 26px 0 12px;
-        padding: 8px 10px;
-        border-left-width: 4px;
-        line-height: 1.45;
-        word-break: break-word;
-      }
-
-      h2:first-of-type {
-        margin-top: 4px;
-      }
-
-      h3 {
-        font-size: 0.98rem;
-        margin: 18px 0 8px;
-        padding-left: 10px;
-        line-height: 1.45;
-        word-break: break-word;
-      }
-
-      hr {
-        margin: 22px 0;
-      }
-
-      blockquote {
-        padding: 12px 14px;
-        font-size: 0.92rem;
-      }
-
-      ul li, ol li {
-        padding-left: 24px;
-      }
-
-      ol li {
-        padding-left: 32px;
-      }
-
-      .table-scroll {
-        margin-left: -14px;
-        margin-right: -14px;
-        padding: 0 14px;
-        border-radius: 0;
-        box-shadow: none;
-        max-width: 100vw;
-      }
-
-      .table-scroll > table {
-        font-size: 0.82rem;
-        border-radius: var(--radius-sm);
-        box-shadow: 0 4px 16px var(--shadow);
-      }
-
-      .table-scroll > table.table-wide {
-        min-width: 520px;
-      }
-
-      .table-scroll > table.table-mid {
-        min-width: 420px;
-      }
-
-      thead th,
-      tbody td {
-        padding: 9px 10px;
-      }
-
-      pre {
-        margin-left: -2px;
-        margin-right: -2px;
-        padding: 14px 12px;
-        font-size: 0.76rem;
-        line-height: 1.6;
-        border-width: 2px;
-      }
-
-      .footer-note {
-        margin-top: 20px;
-        padding: 14px 12px;
-        font-size: 0.92rem;
-        line-height: 1.55;
-      }
-    }
-
-    @media (max-width: 380px) {
-      .hero h1 {
-        font-size: 1.22rem;
-      }
-
-      .hero-deco {
-        font-size: 16px;
-        letter-spacing: 2px;
-      }
-
-      h2 {
-        font-size: 1.05rem;
-      }
     }
 
   /* 打印 / PDF */
@@ -697,18 +507,6 @@
         break-inside: avoid;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-      }
-
-      .table-scroll {
-        overflow: visible;
-        margin: 16px 0 20px;
-        padding: 0;
-        box-shadow: none;
-      }
-
-      .table-scroll > table {
-        min-width: 0;
-        box-shadow: 0 4px 16px var(--shadow);
       }
 
       thead th, tbody tr:nth-child(even) td, pre, .hero {
@@ -843,522 +641,7 @@
       </header>
 
       <main class="content-card">
-<hr />
-<h2>👥 人员编队（13人）</h2>
-<div class="table-scroll"><table class="table-wide">
-<thead>
-<tr>
-<th>战队</th>
-<th>成员</th>
-<th>住宿</th>
-<th>角色</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>A队</strong></td>
-<td>P.P + 老婆 + Excel（小寿星🎂）+ 苏姨</td>
-<td>「森林狂欢」套房</td>
-<td>主力战斗群</td>
-</tr>
-<tr>
-<td><strong>B队</strong></td>
-<td>姐姐 + 姐夫 + Eagle + Nora + 眉姨</td>
-<td>「宇宙探索」套房</td>
-<td>火力支援群</td>
-</tr>
-<tr>
-<td><strong>C队</strong></td>
-<td>Excel 爷爷 + Excel 嫲嫲</td>
-<td>双床房</td>
-<td>后勤指挥部</td>
-</tr>
-<tr>
-<td><strong>D队</strong></td>
-<td>Excel 公公 + Excel 婆婆</td>
-<td>双床房</td>
-<td>战略预备队</td>
-</tr>
-</tbody>
-</table></div>
-<blockquote>
-<p>亲子套房自带滑梯🛝 + 私汤泡池</p>
-</blockquote>
-<hr />
-<h2>🚗 交通规划</h2>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>项目</th>
-<th>详情</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>出发时间</strong></td>
-<td>6月26日 13:30</td>
-</tr>
-<tr>
-<td><strong>出发地</strong></td>
-<td>广州天河冼村回迁房</td>
-</tr>
-<tr>
-<td><strong>路线</strong></td>
-<td>冼村 → 华南快速 → 京珠高速（北行）→ 佛冈出口 → 右转106国道（4公里）</td>
-</tr>
-<tr>
-<td><strong>车程</strong></td>
-<td>约1.5小时</td>
-</tr>
-<tr>
-<td><strong>预计到达</strong></td>
-<td>15:00-15:30</td>
-</tr>
-<tr>
-<td><strong>停车</strong></td>
-<td>酒店免费停车</td>
-</tr>
-</tbody>
-</table></div>
-<blockquote>
-<p>⚡ <strong>建议</strong>：13:30准时发车！两辆车提前确认谁载谁，避免到了现场再协调。</p>
-</blockquote>
-<hr />
-<h2>🌤️ 天气预报</h2>
-<div class="table-scroll"><table class="table-wide">
-<thead>
-<tr>
-<th>日期</th>
-<th>天气</th>
-<th>气温</th>
-<th>风力</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>6/26（周五）</strong></td>
-<td>🌧️ 雷阵雨转中雨</td>
-<td>25-30℃</td>
-<td>微风&lt;3级</td>
-</tr>
-<tr>
-<td><strong>6/27（周六）</strong></td>
-<td>⛅ 多云转雷阵雨</td>
-<td>25-32℃</td>
-<td>微风&lt;3级</td>
-</tr>
-</tbody>
-</table></div>
-<blockquote>
-<p>⚠️ <strong>关键判断</strong>：两天都有雨，26日雨势更大。<strong>温度不高，玩水反而舒服！</strong> 雨具必带！</p>
-</blockquote>
-<hr />
-<h2>🎢 六大项目详解</h2>
-<h3>1. 🦕 奇妙世界（含奇幻侏罗纪）</h3>
-<ul>
-<li><strong>类型</strong>：主题乐园（占地800余亩）</li>
-<li><strong>核心内容</strong>：</li>
-<li><strong>奇幻侏罗纪（恐龙谷）</strong>：30+种1:1仿真恐龙，会动会叫！世界最高最大的有声仿真雷龙！近两公里环山栈道，配合喷雾，像真穿越侏罗纪！</li>
-<li><strong>机动游乐园</strong>：摩天轮、海盗船、过山车、碰碰车等30+项</li>
-<li><strong>萌宠乐园</strong>：羊驼、梅花鹿、土拨鼠、狐獴，饲料约10元/包</li>
-<li><strong>奇妙湿地岛</strong>：水杉林、黑天鹅</li>
-<li><strong>清时光·森林书吧</strong>：室内歇脚、打卡</li>
-<li><strong>森林剧场</strong>：杂技、魔术、童话剧</li>
-<li><strong>位置</strong>：主园区</li>
-<li><strong>室内外</strong>：⚠️ 以室外为主</li>
-</ul>
-<h3>2. 🌊 冰川水谷</h3>
-<ul>
-<li><strong>类型</strong>：大型水上乐园（古冰川文化主题）</li>
-<li><strong>核心内容</strong>：3米海啸冲浪池（整点造浪）、千米情景漂流、冰空彩虹滑梯、亲子水寨、森林温泉区</li>
-<li><strong>位置</strong>：森林酒店旁</li>
-<li><strong>室内外</strong>：⚠️ 室外（水上项目本来湿身，下雨影响不大）</li>
-</ul>
-<h3>3. 🏊 嬉水乐园</h3>
-<ul>
-<li><strong>类型</strong>：松鼠酒店专属水乐园</li>
-<li><strong>核心内容</strong>：网红主题泳道、水上滑梯、喷水设施</li>
-<li><strong>特点</strong>：刷房卡进入，比冰川水谷人少！夏季用天然山泉水，冬季用地下温泉水，全年恒温</li>
-<li><strong>位置</strong>：<strong>松鼠酒店内</strong></li>
-<li><strong>室内外</strong>：✅ 半室内/有顶棚</li>
-</ul>
-<h3>4. 🐿️ 松鼠之家</h3>
-<ul>
-<li><strong>类型</strong>：室内儿童乐园</li>
-<li><strong>核心内容</strong>：松鼠主题游乐、蹦床、滑梯、攀爬</li>
-<li><strong>位置</strong>：<strong>松鼠酒店内</strong></li>
-<li><strong>室内外</strong>：✅ 室内</li>
-</ul>
-<h3>5. 🌲 杉谷飞跃</h3>
-<ul>
-<li><strong>类型</strong>：森林探险（2026年5月新开）</li>
-<li><strong>核心内容</strong>：1000㎡立体魔网、丛林穿越（亲子线+挑战线）、魔法彩虹桥、启蒙乐园</li>
-<li><strong>位置</strong>：奇妙世界旁</li>
-<li><strong>室内外</strong>：❌ 纯室外（雨天暂停）</li>
-</ul>
-<h3>6. ♨️ 森林温泉 / 房间私汤</h3>
-<ul>
-<li><strong>类型</strong>：偏硅酸珍稀氟温泉</li>
-<li><strong>核心内容</strong>：50+个池子（香花区、火山动感区、竹林药浴区），房间私汤送1池水</li>
-<li><strong>位置</strong>：温泉区 + 亲子套房内</li>
-<li><strong>室内外</strong>：⚠️ 露天（有遮棚）</li>
-</ul>
-<hr />
-<h2>🏠 项目室内外属性速查</h2>
-<div class="table-scroll"><table class="table-wide">
-<thead>
-<tr>
-<th>项目</th>
-<th>室内/室外</th>
-<th>雨天影响</th>
-<th>雨天推荐指数</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>🐿️ 松鼠之家</td>
-<td>✅ 室内</td>
-<td>无影响</td>
-<td>⭐⭐⭐⭐⭐</td>
-</tr>
-<tr>
-<td>🏊 嬉水乐园</td>
-<td>✅ 半室内</td>
-<td>基本无影响</td>
-<td>⭐⭐⭐⭐⭐</td>
-</tr>
-<tr>
-<td>♨️ 森林温泉</td>
-<td>⚠️ 露天有棚</td>
-<td>小雨可玩</td>
-<td>⭐⭐⭐⭐</td>
-</tr>
-<tr>
-<td>🌊 冰川水谷</td>
-<td>⚠️ 室外</td>
-<td>湿身项目不受影响</td>
-<td>⭐⭐⭐⭐</td>
-</tr>
-<tr>
-<td>🦕 奇妙世界</td>
-<td>⚠️ 以室外为主</td>
-<td>机动游戏+萌宠受影响</td>
-<td>⭐⭐⭐</td>
-</tr>
-<tr>
-<td>🌲 杉谷飞跃</td>
-<td>❌ 纯室外</td>
-<td>雨天暂停或危险</td>
-<td>⭐⭐</td>
-</tr>
-</tbody>
-</table></div>
-<hr />
-<h2 class="day-title">🗓️ Day 1｜6月26日（周五 · 中雨日）</h2>
-<h3>13:30 🚗 出发</h3>
-<ul>
-<li>带上雨具！雨伞+雨衣（小朋友带雨衣更方便）</li>
-<li>车上备一套干净衣服</li>
-</ul>
-<h3>15:00 🏨 抵达 + 入住</h3>
-<ul>
-<li>如果下大雨，先办入住，行李放房间</li>
-<li>老人（爸妈、岳父岳母）直接回房休息</li>
-<li><strong>⚠️ 入住时补买餐食 &amp; 门票人头</strong>：核对套餐已含人数是否覆盖全部 13 人，不足的当场补齐（自助晚餐、自助早餐、奇妙世界 / 冰川水谷门票等），避免用餐或进园时再排长队补办</li>
-</ul>
-<h3>15:30-17:00 🐿️ 松鼠之家（室内安全区）</h3>
-<ul>
-<li><strong>雨天首选！</strong> 室内蹦床、滑梯、放电</li>
-<li>Excel、Eagle、Nora先玩起来</li>
-<li>大人整理行李，休整</li>
-</ul>
-<h3>17:00-18:00 🦕 奇妙世界 → 奇幻侏罗纪（恐龙谷）</h3>
-<ul>
-<li>30+种1:1仿真恐龙，会动会叫</li>
-<li>世界最高最大的有声仿真雷龙！</li>
-<li>近两公里环山栈道，配合喷雾，穿越侏罗纪</li>
-<li>如果雨大，改去森林书吧（室内）</li>
-</ul>
-<h3>18:00-18:30 🦙 奇妙世界 → 萌宠乐园</h3>
-<ul>
-<li>喂羊驼、梅花鹿（饲料约10元/包）</li>
-<li>土拨鼠、狐獴超萌！</li>
-</ul>
-<h3>18:30-19:30 🍽️ 松鼠餐厅 自助晚餐</h3>
-<ul>
-<li><strong>室内，不受影响</strong></li>
-<li>早点去！抢大桌，13人拼桌或分两桌</li>
-<li>推荐：<strong>烤羊架、三文鱼、清远鸡粥、生蚝</strong></li>
-</ul>
-<h3>20:00-21:30 🌊 冰川水谷 夜场</h3>
-<ul>
-<li><strong>下雨不碍事，本来就要湿身！</strong></li>
-<li>3米海啸冲浪池、漂流河、彩虹滑梯</li>
-<li>老人：森林温泉池（温度适中，单次不超过15分钟）</li>
-<li>雨大备选：嬉水乐园（酒店内，有顶棚）</li>
-</ul>
-<h3>21:30-22:00 🔥 篝火晚会（视天气）</h3>
-<ul>
-<li>小雨撑伞看，别有一番风味</li>
-<li>大雨取消，改酒店内休闲</li>
-</ul>
-<h3>22:00 💤 回房休息</h3>
-<ul>
-<li>亲子套房私汤泡起来（房间送1池温泉水）</li>
-<li>苏姨/眉姨帮娃洗澡收拾</li>
-</ul>
-<hr />
-<h2 class="day-title">🗓️ Day 2｜6月27日（周六 · 🎂 Excel生日正日）</h2>
-<h3>08:00-09:00 🍽️ 自助早餐</h3>
-<ul>
-<li>松鼠餐厅，吃饱！今天主攻户外</li>
-</ul>
-<h3>09:00-10:30 🌲 杉谷飞跃（优先！趁上午可能无雨）</h3>
-<ul>
-<li><strong>放到第二天，趁上午雨还没来</strong></li>
-<li>亲子线：魔网、彩虹桥、丛林穿越（适合小朋友）</li>
-<li>挑战线：大人可以去</li>
-<li>⚠️ 如果下雨暂停，改去松鼠之家/嬉水乐园</li>
-</ul>
-<h3>10:30-12:00 🏊 嬉水乐园 + 冰川水谷</h3>
-<ul>
-<li>杉谷飞跃玩完，直接下水！</li>
-<li>网红泳道、水上滑梯、漂流河</li>
-<li>上午人更少</li>
-</ul>
-<h3>12:00-13:00 🍽️ 午餐</h3>
-<ul>
-<li>山里人家农家乐 或 森林餐厅</li>
-<li><strong>🎂 Excel生日蛋糕！</strong>（附近外送或酒店帮忙）</li>
-<li>全家唱生日歌，开心庆祝！</li>
-</ul>
-<h3>13:00-14:00 🎯 补漏/自由时间</h3>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>选择</th>
-<th>内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>A</strong></td>
-<td>奇妙世界补刷（机动游戏、摩天轮）</td>
-</tr>
-<tr>
-<td><strong>B</strong></td>
-<td>松鼠之家二刷（室内）</td>
-</tr>
-<tr>
-<td><strong>C</strong></td>
-<td>回房收拾+午休</td>
-</tr>
-</tbody>
-</table></div>
-<h3>14:00 🏨 退房</h3>
-<ul>
-<li>行李装车，但<strong>不走！继续玩！</strong></li>
-</ul>
-<h3>14:00-17:00 🌊 冰川水谷 下午场（第二波）</h3>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>时间</th>
-<th>项目</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>14:00-15:30</td>
-<td>3米海啸冲浪池（整点造浪）</td>
-</tr>
-<tr>
-<td>15:30-16:30</td>
-<td>冰空彩虹滑梯、亲子水寨</td>
-</tr>
-<tr>
-<td>16:30-17:00</td>
-<td>森林温泉回血（泡完澡返程）</td>
-</tr>
-</tbody>
-</table></div>
-<blockquote>
-<p>💡 下午人比上午少，排队短！</p>
-</blockquote>
-<h3>17:00 🚗 返程</h3>
-<ul>
-<li>换回干衣服，装车出发</li>
-<li>预计18:00-18:30到广州</li>
-<li><strong>晚上家里给Excel补一顿正式生日宴！</strong> 🎂🎉</li>
-</ul>
-<hr />
-<h2>⏰ 时间线总览</h2>
-<pre><code>Day 1 (6/26 中雨)
-13:30  出发（带雨具）
-15:00  抵达入住
-15:30  松鼠之家（室内暖身）
-17:00  奇妙世界→奇幻侏罗纪（恐龙谷）
-18:00  萌宠乐园
-18:30  自助晚餐 + Excel生日歌🎂
-20:00  冰川水谷（下雨不碍事）
-21:30  篝火晚会（视天气）
-22:00  回房私汤休息
-
-Day 2 (6/27 多云转雷阵雨) 🎂生日正日
-08:00  早餐
-09:00  杉谷飞跃（优先！趁上午无雨）
-10:30  嬉水乐园 + 冰川水谷
-12:00  午餐 + Excel生日蛋糕🎂
-13:00  补漏/自由安排
-14:00  退房（行李装车）
-14:00  冰川水谷下午场（冲浪+滑梯+温泉）
-17:00  返程
-</code></pre>
-<hr />
-<h2>🎒 必带装备清单（13人版）</h2>
-<div class="table-scroll"><table class="table-mid">
-<thead>
-<tr>
-<th>类别</th>
-<th>物品</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>☔ <strong>雨具</strong></td>
-<td>雨伞×5、雨衣×5（大人+小孩）</td>
-<td><strong>必备！</strong></td>
-</tr>
-<tr>
-<td>🏊 <strong>玩水</strong></td>
-<td>泳衣/泳裤（大人×8 + 小孩×3）、泳镜、泳圈</td>
-<td>Excel、Eagle、Nora各带一个</td>
-</tr>
-<tr>
-<td>📱 <strong>防水</strong></td>
-<td>防水手机袋×5</td>
-<td>拍照+防雨</td>
-</tr>
-<tr>
-<td>👟 <strong>防滑</strong></td>
-<td>涉水鞋/防滑拖鞋×13</td>
-<td>地面湿滑烫脚</td>
-</tr>
-<tr>
-<td>🧥 <strong>换洗</strong></td>
-<td>干净衣服×2套（每人）</td>
-<td>湿了有换</td>
-</tr>
-<tr>
-<td>☀️ <strong>防晒</strong></td>
-<td>防晒霜、遮阳帽、墨镜</td>
-<td>户外时间长</td>
-</tr>
-<tr>
-<td>🦟 <strong>驱蚊</strong></td>
-<td>驱蚊液、驱蚊贴</td>
-<td>森林区必备</td>
-</tr>
-<tr>
-<td>♨️ <strong>温泉</strong></td>
-<td>换洗内衣、面膜</td>
-<td>泡汤用</td>
-</tr>
-<tr>
-<td>🎂 <strong>生日</strong></td>
-<td>蛋糕（外送）</td>
-<td>Excel生日</td>
-</tr>
-<tr>
-<td>💊 <strong>常备</strong></td>
-<td>感冒药、肠胃药、创可贴</td>
-<td>防淋雨着凉</td>
-</tr>
-<tr>
-<td>🍬 <strong>零食</strong></td>
-<td>高热量零食、水壶</td>
-<td>补充体力</td>
-</tr>
-</tbody>
-</table></div>
-<hr />
-<h2>💰 额外花费预估</h2>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>项目</th>
-<th>预估费用</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>萌宠饲料</td>
-<td>10元×几包 ≈ 50元</td>
-</tr>
-<tr>
-<td>水世界储物柜</td>
-<td>30元×2-3个 ≈ 90元</td>
-</tr>
-<tr>
-<td>电瓶车租赁</td>
-<td>~50-100元</td>
-</tr>
-<tr>
-<td>午餐（两顿）</td>
-<td>人均60×13×2 ≈ 1,560元</td>
-</tr>
-<tr>
-<td>Excel生日蛋糕（外送）</td>
-<td>~200元</td>
-</tr>
-<tr>
-<td><strong>合计</strong></td>
-<td><strong>约2,000元左右</strong></td>
-</tr>
-</tbody>
-</table></div>
-<hr />
-<h2>💡 核心策略总结</h2>
-<ol>
-<li><strong>杉谷飞跃放Day 2上午</strong>：趁雨还没来先玩，下午雷阵雨来了也不怕</li>
-<li><strong>松鼠之家Day 1暖身</strong>：室内，下雨不担心</li>
-<li><strong>玩水项目雨天照样玩</strong>：反正要湿身，下雨反而人少更爽</li>
-<li><strong>老人+小孩节奏</strong>：温泉+私汤，舒服不淋雨</li>
-<li><strong>退房后还能玩</strong>：行李装车，人继续玩，17:00再走</li>
-</ol>
-<hr />
-<h2>📞 实用信息</h2>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>项目</th>
-<th>信息</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>酒店地址</strong></td>
-<td>清远市佛冈县森波拉度假森林（京珠高速佛冈出口旁）</td>
-</tr>
-<tr>
-<td><strong>酒店电话</strong></td>
-<td>0763-4382333</td>
-</tr>
-<tr>
-<td><strong>奇妙世界时间</strong></td>
-<td>9:00-22:00</td>
-</tr>
-<tr>
-<td><strong>自助早餐</strong></td>
-<td>7:30-10:00</td>
-</tr>
-<tr>
-<td><strong>入住补买</strong></td>
-<td>餐食 &amp; 门票人头不足 13 人时，前台当场补齐</td>
-</tr>
-</tbody>
-</table></div>
+{body}
       </main>
 
       <div class="footer-note">
@@ -1469,3 +752,46 @@ Day 2 (6/27 多云转雷阵雨) 🎂生日正日
   </div>
 </body>
 </html>
+"""
+
+
+def post_process_html(html: str) -> str:
+    """微调生成的 HTML 结构"""
+    # 移除 markdown 生成的第一个 h1（已在 hero 中展示）
+    html = re.sub(r"<h1>.*?</h1>\s*", "", html, count=1, flags=re.DOTALL)
+
+    # 移除开头元信息引用块（已在 hero 展示）
+    html = re.sub(r"<blockquote>\s*<p><strong>Excel.*?</blockquote>\s*", "", html, count=1, flags=re.DOTALL)
+
+    # 移除末尾祝福引用块（已在 footer 展示）
+    html = re.sub(r"<hr />\s*<blockquote>\s*<p>🏁.*?</blockquote>\s*$", "", html, count=1, flags=re.DOTALL)
+
+    # Day 标题加特殊标记
+    html = re.sub(
+        r"<h2>🗓️ (Day \d[^<]*)</h2>",
+        r'<h2 class="day-title">🗓️ \1</h2>',
+        html,
+    )
+
+    return html.strip()
+
+
+def main():
+    md_text = MD_FILE.read_text(encoding="utf-8")
+
+    body = markdown.markdown(
+        md_text,
+        extensions=[
+            TableExtension(),
+            FencedCodeExtension(),
+        ],
+    )
+    body = post_process_html(body)
+
+    full_html = HTML_TEMPLATE.replace("{body}", body)
+    HTML_FILE.write_text(full_html, encoding="utf-8")
+    print(f"已生成: {HTML_FILE}")
+
+
+if __name__ == "__main__":
+    main()
