@@ -142,29 +142,44 @@
     }
 
     @media (max-width: 1080px) {
-      /* 平板/手机：固定贴边，从屏幕两侧探出 */
+      /* 平板/手机：固定贴边，约一半身子探出屏幕 */
       .animal-lane {
         position: fixed;
         top: 0;
-        width: 54px;
+        width: 22px;
         height: 100vh;
         height: 100dvh;
         z-index: 5;
         pointer-events: none;
+        overflow: hidden;
       }
 
       .animal-lane-left { left: 0; }
       .animal-lane-right { right: 0; }
 
-      .peek-animal {
-        width: 50px;
+      .peek-animal,
+      .peek-animal--wide,
+      .peek-animal--tall {
+        width: 40px;
       }
 
-      .peek-animal--wide { width: 56px; }
-      .peek-animal--tall { width: 46px; }
+      .peek-animal-left .peek-animal-body { margin-left: -20px; }
+      .peek-animal-right .peek-animal-body { margin-right: -20px; }
+    }
 
-      .peek-animal-left .peek-animal-body { margin-left: -14px; }
-      .peek-animal-right .peek-animal-body { margin-right: -14px; }
+    @media (max-width: 768px) {
+      .animal-lane {
+        width: 18px;
+      }
+
+      .peek-animal,
+      .peek-animal--wide,
+      .peek-animal--tall {
+        width: 32px;
+      }
+
+      .peek-animal-left .peek-animal-body { margin-left: -16px; }
+      .peek-animal-right .peek-animal-body { margin-right: -16px; }
     }
 
     @media (max-width: 600px) {
@@ -454,6 +469,23 @@
       min-width: 100%;
     }
 
+    /* 两列表格：左侧「项目」列加宽，避免标签换行 */
+    .table-label-wide {
+      table-layout: fixed;
+    }
+
+    .table-label-wide th:first-child,
+    .table-label-wide td:first-child {
+      width: 38%;
+      min-width: 108px;
+      white-space: nowrap;
+    }
+
+    .table-label-wide th:last-child,
+    .table-label-wide td:last-child {
+      width: 62%;
+    }
+
   /* 时间线代码块 */
     pre {
       margin: 16px 0;
@@ -605,6 +637,11 @@
 
       .table-scroll > table.table-mid {
         min-width: 420px;
+      }
+
+      .table-label-wide th:first-child,
+      .table-label-wide td:first-child {
+        min-width: 96px;
       }
 
       thead th,
@@ -834,7 +871,7 @@
     <div class="page-wrap">
       <header class="hero">
         <div class="hero-deco">🌲 🐿️ 🦕 🌊 🛝</div>
-        <h1>111森波拉松鼠酒店<br>13人大家庭 2天1夜作战手册</h1>
+        <h1>森波拉松鼠酒店<br>13人大家庭 2天1夜作战手册</h1>
         <div class="hero-meta">
           <span class="hero-badge birthday">🎂 Excel 小朋友生日特别版</span>
           <span class="hero-badge">📅 2026年6月26日 出发</span>
@@ -886,7 +923,7 @@
 </blockquote>
 <hr />
 <h2>🚗 交通规划</h2>
-<div class="table-scroll"><table>
+<div class="table-scroll"><table class="table-label-wide">
 <thead>
 <tr>
 <th>项目</th>
